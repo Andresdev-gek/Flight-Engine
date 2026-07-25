@@ -28,7 +28,7 @@ export interface FlightDuration {
   locale: string;
 }
 
-export interface Flight {
+export interface FlightLeg {
   flightNumber: string;
   aircraft: Aircraft;
   origin: Airport;
@@ -37,6 +37,20 @@ export interface Flight {
   duration: FlightDuration;
   departureTime: string;
   arrivalTime: string;
+}
+
+export interface Price {
+  amount: number;
+  currency: string;
+}
+
+export interface Flight extends FlightLeg {
+  // Each flight is composed of one or more legs.
+  // A direct flight has exactly one leg (legs.length === 1, isDirect === true).
+  // A connecting flight has more than one leg (legs.length > 1, isDirect === false).
+  legs: FlightLeg[];
+  price: Price;
+  isDirect: boolean;
 }
 
 export interface FlightQueryParams {

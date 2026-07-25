@@ -4,10 +4,17 @@ import { flightCache } from '../FlightCache';
 import { Generator } from '../Generator';
 import { Flight } from '../types';
 
+// Probability buckets (in percent) used to decide whether a flight on a route
+// is direct, has a single layover, or has two layovers. Values are inclusive
+// thresholds drawn from this.random(0, 100).
+const DIRECT_THRESHOLD = 70; // 0..70  -> direct
+const ONE_LAYOVER_THRESHOLD = 90; // 71..90 -> 1 layover
+// 91..100 -> 2 layovers
+
 export function generateFlightsByDate(date: DateTime): Flight[] {
   const seed = date.toISODate();
   const gen = new Generator(seed);
-  let generatedFlights = [];
+  let generatedFlights: Flight[] = [];
 
   // Test cache for data
   const cachedFlights = flightCache.getFlights(seed);
@@ -29,7 +36,22 @@ export function generateFlightsByDate(date: DateTime): Flight[] {
 
           for (let k = 0; k <= numFlights; k += 1) {
             time = time.plus({ hours: flightTimeOffset, minutes: gen.random(-20, 20) });
-            generatedFlights.push(gen.flight(origin, destination, time));
+
+            // Decide whether this slot is direct or a connecting flight.
+            // The decision is part of the seeded random sequence, so the
+            // output stays fully deterministic for a given date.
+            const flightTypeRoll = gen.random(0, 100);
+
+            let flight: Flight;
+            if (flightTypeRoll <= DIRECT_THRESHOLD) {
+              flight = gen.flight(origin, destination, time);
+            } else if (flightTypeRoll <= ONE_LAYOVER_THRESHOLD) {
+              flight = gen.layoverFlight(origin, destination, time, 1);
+            } else {
+              flight = gen.layoverFlight(origin, destination, time, 2);
+            }
+
+            generatedFlights.push(flight);
           }
         }
       }

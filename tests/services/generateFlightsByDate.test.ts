@@ -14,6 +14,9 @@ const mockFlights = [
     departureTime: '2020-01-01T03:46:40.000-05:00',
     arrivalTime: '2020-01-01T23:49:40.000-04:00',
     aircraft: { model: '738', passengerCapacity: { total: 160, main: 144, first: 16 }, speed: 400 },
+    legs: [],
+    price: { amount: 100, currency: 'USD' },
+    isDirect: true,
   },
 ];
 jest.mock('../../src/FlightCache.ts', () => ({

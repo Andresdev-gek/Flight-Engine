@@ -28,11 +28,8 @@ interface Booking {
   createdAt: string;
 }
 
-function calculateFakePrice(flight: Flight): number {
-  const base = 49;
-  const perMile = 0.09;
-  return Math.round((base + flight.distance * perMile) * 100) / 100;
-}
+// Prices are now generated as part of each Flight object (see Generator.ts),
+// so the booking simply reuses the flight's price instead of recomputing it.
 
 // POST /bookings
 // body: { date: "YYYY-MM-DD", flightNumber: "0978", passenger: { firstName, lastName, email } }
@@ -81,8 +78,8 @@ bookings.post('/', (req, res) => {
       email: passenger.email,
     },
     price: {
-      amount: calculateFakePrice(flight),
-      currency: 'USD',
+      amount: flight.price.amount,
+      currency: flight.price.currency,
     },
     createdAt: DateTime.utc().toISO(),
   };
